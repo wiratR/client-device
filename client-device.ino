@@ -36,7 +36,7 @@ void show_time();
 void debugTime();
 void scanSwitch();
 void welcome_sceen(int showDelay);
-
+bool validNumber(char number);
 int paymentAPI( char data[]);
 
 void setup()
@@ -76,6 +76,10 @@ void setup()
         Serial.print("The current date and time is: ");
         debugTime();
         welcome_sceen(2000);
+
+        lcd.setCursor(0, 2);
+        //         01234567890123
+        lcd.print(" value = ");
     }
 }
 
@@ -84,10 +88,6 @@ int count = 0;
 void loop()
 {
     char key = keypad.getKey();
-    lcd.setCursor(0, 3);
-    lcd.cursor();
-    //         01234567890123
-    lcd.print("vale = ");
     if(key)  
     {
         trigger_buzzer(1);      // enable buzzer
@@ -102,30 +102,31 @@ void loop()
             {
                 // sent the value to paument
                 Serial.print("sent to payment value : " );
-                
                 if ( paymentAPI (txnAmount) != 0 )
                 {
                     // payment error
-                    lcd.setCursor(0, 4);
+                    lcd.setCursor(0, 3);
                              //012345678901234567890
                     lcd.print("==== sent error ====");
                 }
                 else
                 {
-                    lcd.setCursor(0, 4);
+                    lcd.setCursor(0, 3);
                              //012345678901234567890
                     lcd.print("==sent sucessfully==");
                 }
                 delay(800);
+                lcd.clear();
                 count = 0;
-                txnAmount = {}; // clear txnAmount
-                lcd.setCursor(0, 3);
-                lcd.cursor();
-                lcd.print("vale = ");
+                txnAmount[4] = {}; // clear txnAmount
+                lcd.setCursor(0, 2);
+                //lcd.cursor();
+                lcd.print(" value = ");
+                showTime();
             }
-            else if (count < 5)
+            else if ((count < 4) && validNumber(key))
             {
-                lcd.setCursor(7 + count, 3);
+                lcd.setCursor(9 + count, 2);
                 //Print the detected key
                 lcd.print(key);
                 txnAmount[count] = key;
@@ -257,6 +258,18 @@ void welcome_sceen(int showDelay)
     lcd.print("Waiitng ........");
     delay(showDelay);
     lcd.clear();
+}
+
+bool validNumber(char key)
+{
+    if( key >= '0' && key <= '9')
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 int paymentAPI(char data[]){
